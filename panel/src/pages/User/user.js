@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../../components/header';
 import bottomlogo from '../../assets/sinup.webp';
 import image from '../../assets/siva.jpg';
@@ -12,9 +12,12 @@ import Rightbar from '../../components/rightbar';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Link } from 'react-router-dom';
+import { getIntro } from '../../api/intro';
+import { getAbout } from '../../api/about';
 function User() {
   const [value, setValue] = useState(0);
-
+  const [intros, setIntros] = useState([]);
+  const [abouts, setAbouts] = useState([]);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -42,6 +45,21 @@ function User() {
       },
     ],
   };
+  useEffect(() => {
+  getPortfolio();
+  }, []);
+
+  const getPortfolio = async () => {
+    try {
+      const res = await getIntro();
+      console.log(res?.data?.result);
+      const res1 = await getAbout();
+      setIntros(res?.data?.result);
+      setAbouts(res1.data.result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <Header />
@@ -53,27 +71,30 @@ function User() {
           <h2>Intro</h2>
           <hr />
           <div className='container-fluid developer_background p-5 d-flex justify-content-center align-items-center gap-2 user_intro mt-1 flex-column flex-lg-row'>
-      <div className='col-12 col-lg-6 col-md-6 mb-4 mb-lg-0'>
-        <div className='text-white    '><h5>Hi, I am</h5></div>
-        <div className='d-flex gap-3 '>
-          <h1 className='user_intro_fullname'>Sivakumar</h1>
-          <h1 className='user_intro_fullname'>R</h1>
-        </div>
-        <div>
-          <h2 className='text-white text-bold '>Build Things For The FullStack Mern Developer</h2>
-        </div>
-        <div className='text-white'>
-          I am a FullStack Mern Developer. Currently working as a frontend Reactjs developer in India and also working as a FullStack Mern Developer.
-        </div>
-        <div className='mt-3'>
-          <Link to="/contactme">
-          <button href="/contactme" className='bg-white text-white text-bold border-2 border border-warning p-2 contact_me'>Contact Me</button>
-          </Link>
-        </div>
-      </div>
-      <div className='col-12 col-lg-6 col-md-6 d-flex justify-content-center align-items-center'>
-        <img className='rounded-circle'  src={image} alt="Developer" height={"300px"} width={"300px"}  />
-      </div>
+            {intros?.map((intro, index) => (
+             
+            
+      <><div className='col-12 col-lg-6 col-md-6 mb-4 mb-lg-0'>
+                <div className='text-white    '><h5>{intro?.title}</h5></div>
+                <div className='d-flex gap-3 '>
+                  <h1 className='user_intro_fullname'>{intro?.firstName}</h1>
+                  <h1 className='user_intro_fullname'>{intro?.lastName}</h1>
+                </div>
+                <div>
+                  <h2 className='text-white text-bold '>{intro?.caption}</h2>
+                </div>
+                <div className='text-white'>
+                 {intro?.description}
+                </div>
+                <div className='mt-3'>
+                  <Link to="/contactus">
+                    <button href="/contactus" className='bg-white text-white text-bold border-2 border border-warning p-2 contact_me'>Contact Me</button>
+                  </Link>
+                </div>
+              </div><div className='col-12 col-lg-6 col-md-6 d-flex justify-content-center align-items-center'>
+                  <img className='rounded-circle' src={intro?.image} alt="Developer" height={"300px"} width={"300px"} />
+                </div></>
+      ))}
     </div>
         </div>
      
@@ -82,6 +103,8 @@ function User() {
           <div>
             <h2>About</h2>
             <hr />
+            {abouts?.map((about, index) => (
+          
             <div className='container-fluid d-flex justify-content-center align-items-center row user_background '>
               <div className=' col-12 col-lg-6 col-md-6'>
                 <div><img src={bottomlogo} alt="Bottom Logo" height={"100%"} width={"100%"} /></div>
@@ -144,6 +167,7 @@ function User() {
                 </div>
               </div>
             </div>
+              ))}
           </div>
         </div>
 

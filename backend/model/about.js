@@ -6,7 +6,7 @@ const aboutSchema = new mongoose.Schema({
     image:{type:String},
     description1: { type: String },
     description2: { type: String },
-    skills: [{ type: String }],
+    skills: [ ],
     resume: { type: String },
     isDeleted: { type: Boolean, default: false },
     status: { type: Number, default: 1 },

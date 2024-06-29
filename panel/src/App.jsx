@@ -12,8 +12,9 @@ import Experience from "./pages/Admin/Experience/experience";
 import Certification from "./pages/Admin/Certification/certification";
 import Contact from "./pages/Admin/Contact/contact";
 import Rightbar from './components/rightbar';
-import Contactme from './pages/Admin/Contactme/contactme'
-import Education from './pages/Admin/Education/education'
+import Contactme from './pages/Admin/Contactme/contactme';
+import Education from './pages/Admin/Education/education';
+import Contactus from './pages/User/Contact/Contact';
 
 function App() {
 
@@ -36,6 +37,7 @@ function App() {
        <Route path="/rightbar" element={<Rightbar/>} />
        <Route path="/contactme" element={<Contactme/>} />
        <Route path="/education" element={<Education/>} />
+       <Route path="/contactus" element={<Contactus/>} />
        </Routes>
        </BrowserRouter>
        
