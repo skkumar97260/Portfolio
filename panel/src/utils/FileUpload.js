@@ -3,13 +3,13 @@ import S3 from "aws-sdk/clients/s3";
 export const uploadFile = async (file, FOLDER) => {
   const contentType = file.type;
   const bucket = new S3({
-    accessKeyId: process.env.REACT_APP_AWS_ACCESS_ID,
+    accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
-    region:process.env.REACT_APP_AWS_REGION,
+    region:process.env.REACT_APP_AWS_S3_REGION,
   });
 
   const params = {
-    Bucket: "namma-ooru-tamili",
+    Bucket: process.env.REACT_APP_AWS_S3_BUCKET,
     Key: FOLDER + file.name,
     Body: file,
     ACL: "public-read",
