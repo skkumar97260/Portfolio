@@ -162,13 +162,13 @@ const Header = () => {
                           </button>
                         </Link>
                       </div>
-                      <div className="nav-item mx-1 p-2">
+                      {/* <div className="nav-item mx-1 p-2">
                         <Link to="/signup" className="text-decoration-none">
                           <button type="button" className="btn-style btn btn-success">
                             SignUp
                           </button>
                         </Link>
-                      </div>
+                      </div> */}
                     </div>
                   </>
                 )}
@@ -314,13 +314,13 @@ const Header = () => {
                           </button>
                         </Link>
                       </div>
-                      <div className="nav-item mx-1 p-2">
+                      {/* <div className="nav-item mx-1 p-2">
                         <Link to="/signup" className="text-decoration-none">
                           <button type="button" className="btn-style btn btn-success">
                             SignUp
                           </button>
                         </Link>
-                      </div>
+                      </div> */}
                     </div>
 
                   </>
