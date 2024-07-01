@@ -7,7 +7,7 @@ exports.saveAbout = async (req, res) => {
         res.status(200).json({ result: about, message: "About created successfully" });
     }
     catch (error) {
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: error });
     }
 }
 
@@ -37,7 +37,7 @@ exports.updateAbout = async (req, res) => {
         res.status(200).json({ result: about, message: "About updated successfully" });
     }
     catch (error) {
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: error.message });
     }
 }
 

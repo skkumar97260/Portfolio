@@ -6,7 +6,7 @@ import Header from '../../../components/header';
 import bottomlogo from '../../../assets/wave.svg';
 import './about.css';
 import { getAdminId } from '../../../utils/Storage';
-import { uploadFile } from '../../../utils/FileUpload'; // Ensure this is correctly imported
+import { uploadFile } from '../../../utils/FileUpload';
 
 const About = () => {
     const profileRef = useRef(null);
@@ -17,7 +17,7 @@ const About = () => {
         image: '',
         description1: '',
         description2: '',
-        skills: '',
+        skills: [{ skill: '', image: '' }],
         resume: '',
     };
 
@@ -25,7 +25,7 @@ const About = () => {
         image: { required: false },
         description1: { required: false },
         description2: { required: false },
-        skills: { required: false },
+        skills: [{ skill: { required: false }, image: { required: false } }],
         resume: { required: false },
     };
 
@@ -37,20 +37,25 @@ const About = () => {
 
     const handleValidation = (data) => {
         let error = { ...initialStateErrors };
-        if(data.image === "") {
+        if (data.image === "") {
             error.image.required = true;
         }
-        if(data.description1 === "") {
+        if (data.description1 === "") {
             error.description1.required = true;
         }
-        if(data.description2 === "") {
+        if (data.description2 === "") {
             error.description2.required = true;
         }
-        if(data.skills === "") {
-            error.skills.required = true;
-        }
-        if(data.resume === "") {
-            error.resume.required = true;   
+        data.skills.forEach((skill, index) => {
+            if (skill.skill === "") {
+                error.skills[index] = { ...error.skills[index], skill: { required: true } };
+            }
+            if (skill.image === "") {
+                error.skills[index] = { ...error.skills[index], image: { required: true } };
+            }
+        });
+        if (data.resume === "") {
+            error.resume.required = true;
         }
         return error;
     };
@@ -63,19 +68,63 @@ const About = () => {
         }
     };
 
-    const handleFileInputs = (event) => {
+    const handleSkillsChange = (event, index) => {
+        const { name, value } = event.target;
+        const newSkills = [...inputs.skills];
+        newSkills[index] = { ...newSkills[index], [name]: value };
+        setInputs({ ...inputs, skills: newSkills });
+    };
+
+    const addSkillField = () => {
+        setInputs({ ...inputs, skills: [...inputs.skills, { skill: '', image: '' }] });
+        setErrors({ ...errors, skills: [...errors.skills, { skill: { required: false }, image: { required: false } }] });
+    };
+
+    const removeSkillField = (index) => {
+        const newSkills = [...inputs.skills];
+        newSkills.splice(index, 1);
+        setInputs({ ...inputs, skills: newSkills });
+    };
+
+    const handleFileImage = (event) => {
         const file = event.target.files[0];
-        const folder = event.target.name === "image" ? "Intro/" : "Resumes/";
+        const folder = "Image/";
         if (file) {
             uploadFile(file, folder)
                 .then((res) => {
-                    setInputs({ ...inputs, [event.target.name]: res.Location });
-                    if (event.target.name === "resume") {
-                        resumeRef.current.value = ''; // Reset file input
-                    }
-                    if (event.target.name === "image") {
-                        profileRef.current.value = ''; // Reset file input
-                    }
+                    setInputs({ ...inputs, image: res.Location });
+                })
+                .catch((err) => {
+                    console.log(err);
+                    toast.error("File upload failed. Please try again.");
+                });
+        }
+    };
+
+    const handleFileInputs = (event, index) => {
+        const file = event.target.files[0];
+        const folder = "Skills/";
+        if (file) {
+            uploadFile(file, folder)
+                .then((res) => {
+                    const newSkills = [...inputs.skills];
+                    newSkills[index] = { ...newSkills[index], image: res.Location };
+                    setInputs({ ...inputs, skills: newSkills });
+                })
+                .catch((err) => {
+                    console.log(err);
+                    toast.error("File upload failed. Please try again.");
+                });
+        }
+    };
+
+    const handleFileResume = (event) => {
+        const file = event.target.files[0];
+        const folder = "Resume/";
+        if (file) {
+            uploadFile(file, folder)
+                .then((res) => {
+                    setInputs({ ...inputs, resume: res.Location });
                 })
                 .catch((err) => {
                     console.log(err);
@@ -113,19 +162,6 @@ const About = () => {
         }
     };
 
-    const handleEdit = (about) => {
-        setSelectedAbout(about);
-        setInputs({
-            userId: getAdminId(),
-            _id: about._id,
-            image: about.image,
-            description1: about.description1,
-            description2: about.description2,
-            skills: about.skills,
-            resume: about.resume,
-        });
-    };
-
     const updateAbouts = (event) => {
         event.preventDefault();
         const newError = handleValidation(inputs);
@@ -144,6 +180,21 @@ const About = () => {
                     toast.error(err?.response?.data?.message);
                 });
         }
+    };
+
+    const handleEdit = (about) => {
+        console.log("about", about);
+        setSelectedAbout(about);
+        setInputs({
+            userId: getAdminId(),
+            _id: about._id,
+            image: about.image,
+            description1: about.description1,
+            description2: about.description2,
+            skills: about.skills.length > 0 ? about.skills : [{ skill: '', image: '' }],
+            resume: about.resume,
+        });
+        
     };
 
     const handleCancelEdit = () => {
@@ -184,115 +235,162 @@ const About = () => {
                         htmlFor="fileInputImage"
                         className="file-upload btn rounded-circle image_notify"
                     >
-                        {inputs.image ? (
+                        {inputs?.image ? (
                             <img
-                                src={inputs.image}
+                                src={inputs?.image}
                                 width="100"
                                 height="100"
-                                alt="Preview"
-                                className="preview-image rounded-circle"
-                                name="image"
+                                className="rounded-circle"
+                                alt="Profile"
                             />
                         ) : (
-                            <FiCamera size={60} />
+                            <FiCamera size={40} />
                         )}
                     </label>
                     <input
                         ref={profileRef}
-                        className="file-upload"
-                        onChange={handleFileInputs}
-                        name="image"
-                        id="fileInputImage"
                         type="file"
-                        accept="image/*"
-                        style={{ display: "none" }}
+                        id="fileInputImage"
+                        name="image"
+                        onChange={handleFileImage}
+                        hidden
                     />
                     {errors.image.required && (
-                        <span className="text-danger form-text">This field is required.</span>
+                        <span className="text-danger">Image is required.</span>
                     )}
-
+                    <br />
                     <div className="form-group">
-                        <label htmlFor="description1">Description1</label>
+                        <label className="text-black">Description 1<span className="text-danger">*</span></label>
                         <input
-                            type="text"
                             className="form-control"
-                            id="description1"
+                            type="text"
                             name="description1"
                             value={inputs.description1}
                             onChange={handleInputs}
-                            required
                         />
                         {errors.description1.required && (
-                            <span className="text-danger form-text">This field is required.</span>
+                            <span className="text-danger">Description 1 is required.</span>
                         )}
                     </div>
-
                     <div className="form-group">
-                        <label htmlFor="description2">Description2</label>
+                        <label className="text-black">Description 2<span className="text-danger">*</span></label>
                         <input
-                            type="text"
                             className="form-control"
-                            id="description2"
+                            type="text"
                             name="description2"
                             value={inputs.description2}
                             onChange={handleInputs}
-                            required
                         />
                         {errors.description2.required && (
-                            <span className="text-danger form-text">This field is required.</span>
+                            <span className="text-danger">Description 2 is required.</span>
                         )}
                     </div>
-
                     <div className="form-group">
-                        <label htmlFor="skills">Skills</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="skills"
-                            name="skills"
-                            value={inputs.skills}
-                            onChange={handleInputs}
-                            required
-                        />
-                        {errors.skills.required && (
-                            <span className="text-danger form-text">This field is required.</span>
-                        )}
+                        <label className="text-black">Skills<span className="text-danger">*</span></label>
+                        {inputs.skills.map((skill, index) => (
+                            <div key={index} className="mb-2">
+                                <input
+                                    className="form-control"
+                                    type="text"
+                                    name="skill"
+                                    placeholder={`Skill ${index + 1}`}
+                                    value={skill.skill}
+                                    onChange={(event) => handleSkillsChange(event, index)}
+                                />
+                                {errors.skills[index]?.skill?.required && (
+                                    <span className="text-danger">Skill name is required.</span>
+                                )}
+                                <br />
+                                <label htmlFor={`fileInputSkills-${index}`} className="file-upload btn rounded-circle image_notify">
+                                    {skill.image ? (
+                                        <img
+                                            src={skill.image}
+                                            width="50"
+                                            height="50"
+                                            className="rounded-circle"
+                                            alt="Skill"
+                                        />
+                                    ) : (
+                                        <FiCamera size={20} />
+                                    )}
+                                </label>
+                                <input
+                                    ref={profileRef}
+                                    type="file"
+                                    id={`fileInputSkills-${index}`}
+                                    name="image"
+                                    onChange={(event) => handleFileInputs(event, index)}
+                                    hidden
+                                />
+                                {errors.skills[index]?.image?.required && (
+                                    <span className="text-danger">Skill image is required.</span>
+                                )}
+                                <button
+                                    type="button"
+                                    className="btn btn-danger btn-sm ml-2"
+                                    onClick={() => removeSkillField(index)}
+                                >
+                                    Remove Skill
+                                </button>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={addSkillField}
+                        >
+                            Add Skill
+                        </button>
                     </div>
-
                     <div className="form-group">
-                        <label htmlFor="resume">Resume</label>
+                        <label className="text-black">
+                            Upload Resume
+                            <span className="text-danger">*</span>&nbsp;
+                        </label><br />
+                     
                         <input
-                            ref={resumeRef}
-                            className="form-control"
-                            onChange={handleFileInputs}
-                            name="resume"
-                            id="fileInputResume"
+                           ref={resumeRef}
                             type="file"
-                            accept="application/pdf"
-                            
+                            id="fileInputResume"
+                            name="resume"
+                            onChange={handleFileResume}
+                            className="form-control"
                         />
                         {errors.resume.required && (
-                            <span className="text-danger form-text">This field is required.</span>
+                            <span className="text-danger">Resume is required.</span>
                         )}
                     </div>
-
-                    <button type="submit" className="btn btn-primary mt-3">
-                        {selectedAbout ? 'Update' : 'Add'}
-                    </button>
-                    {selectedAbout && (
-                        <button type="button" className="btn btn-danger mt-3" onClick={handleCancelEdit}>
-                            Cancel
-                        </button>
-                    )}
+                    <div className="row mt-4">
+                        <div className="col-md-6 col-lg-12">
+                            <div className="form-group">
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary btn-block"
+                                >
+                                    {selectedAbout ? 'Update' : 'Save'}
+                                </button>
+                                {selectedAbout && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-danger btn-block mt-2"
+                                        onClick={handleCancelEdit}
+                                    >
+                                        Cancel Edit
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </form>
-
-                <div className="table-responsive">
-                    <table className="table mt-5 mb-5 table-bordered border-primary">
+                <br />
+                <div>
+                    <h1 className="text-black text-center mb-4">List of About</h1>
+                    <table className="table table-bordered">
                         <thead>
                             <tr>
                                 <th>Image</th>
-                                <th>Description1</th>
-                                <th>Description2</th>
+                                <th>Description 1</th>
+                                <th>Description 2</th>
                                 <th>Skills</th>
                                 <th>Resume</th>
                                 <th>Actions</th>
@@ -301,16 +399,51 @@ const About = () => {
                         <tbody>
                             {abouts.map((about) => (
                                 <tr key={about._id}>
-                                    <td><img src={about.image} alt="Intro Image" width="100" height="100" /></td>
+                                    <td>
+                                        <img
+                                            src={about.image}
+                                            alt="About"
+                                            className="rounded-circle"
+                                            width="50"
+                                            height="50"
+                                        />
+                                    </td>
                                     <td>{about.description1}</td>
                                     <td>{about.description2}</td>
-                                    <td>{about.skills}</td>
-                                    <td>{about.resume}</td>
                                     <td>
-                                        <button type="button" className="btn btn-primary mr-2" onClick={() => handleEdit(about)}>
+                                    {about.skills.map((skill, skillIndex) => (
+                                            <div key={skillIndex} className="mb-2 d-flex">
+                                                <p>{skillIndex + 1} - {skill.skill}</p>
+                                                <img
+                                                    src={skill.image}
+                                                    alt={skill.skill}
+                                                    className="img-thumbnail"
+                                                    width="50"
+                                                    height="50"
+                                                />
+                                            </div>
+                                        ))}
+                                    </td>
+                                    <td>
+                                        <a
+                                            href={about.resume}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            View Resume
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <button
+                                            className="btn btn-sm btn-primary mr-2"
+                                            onClick={() => handleEdit(about)}
+                                        >
                                             Edit
                                         </button>
-                                        <button type="button" className="btn btn-danger" onClick={() => deleteAbouts(about._id)}>
+                                        <button
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => deleteAbouts(about._id)}
+                                        >
                                             Delete
                                         </button>
                                     </td>
@@ -320,9 +453,12 @@ const About = () => {
                     </table>
                 </div>
             </div>
-            <div className="bt">
-                <img className="bottom" src={bottomlogo} alt="Bottom Logo" />
-            </div>
+            <footer>
+                <img src={bottomlogo} alt="" className="wave" />
+                <div className="footer content">
+                    <p>@2021 About Us. All Rights Reserved | Design by Samip Samrat</p>
+                </div>
+            </footer>
         </div>
     );
 };

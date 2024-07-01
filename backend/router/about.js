@@ -1,42 +1,42 @@
 const express = require('express');
 const router = express.Router();
-const { saveAbout, getAbout, getsingleAbout, updateAbout, deleteAbout } = require('../controller/about'); // Corrected function name
+const { saveAbout, getAbout, getsingleAbout, updateAbout, deleteAbout } = require('../controller/about');
 const { checkQuery, checkBody } = require('../middleware/validators');
-const {basicAuth  } = require('../middleware/basicauth');
+const { basicAuth } = require('../middleware/basicauth');
 const { checkSession } = require('../middleware/tokenManager');
 
 router.post('/', // create About
-   basicAuth ,
-    checkBody(['image', 'description1', 'description2','resume','skills']),
-    saveAbout,
-    // checkSession
+   basicAuth,
+   checkBody([]),
+   saveAbout
+   // checkSession // Uncomment if needed
 );
 
 router.get('/', // get all About
-   basicAuth ,
-    // checkSession,
-    getAbout
+   basicAuth,
+   // checkSession, // Uncomment if needed
+   getAbout
 );
 
 router.get('/getsingleAbout',
-   basicAuth ,
-    // checkSession,
-    checkQuery(['_id']),
-    getsingleAbout
+   basicAuth,
+   // checkSession, // Uncomment if needed
+   checkQuery(['_id']),
+   getsingleAbout
 );
 
 router.put('/', // update About
-   basicAuth ,
-    // checkSession,
-    checkBody(['_id', 'image', 'description1', 'description2','resume','skills']),
-    updateAbout
+   basicAuth,
+   // checkSession, // Uncomment if needed
+   checkBody(['_id']),
+   updateAbout
 );
 
 router.delete('/', // delete About
-   basicAuth ,
-    // checkSession,
-    checkQuery(['_id']),
-    deleteAbout
+   basicAuth,
+   // checkSession, // Uncomment if needed
+   checkQuery(['_id']),
+   deleteAbout
 );
 
 module.exports = router;

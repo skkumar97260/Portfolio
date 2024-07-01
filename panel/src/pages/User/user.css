@@ -46,3 +46,13 @@
     border-radius: 10px 0px 10px 0px !important;
     font-weight: 700;
 }
+
+.Download_CV
+{
+    background: linear-gradient(to bottom right, #fd00ad, #1414e393);
+    padding: 5px;
+    color: whitesmoke;
+    border-radius: 10px 0px 10px 0px !important;
+    font-weight: 700;
+    border: 1px solid whitesmoke;
+}
